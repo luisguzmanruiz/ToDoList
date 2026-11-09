@@ -16,7 +16,7 @@ class TodoApp extends StatelessWidget {
       theme: ThemeData(
         useMaterial3: false,
         primarySwatch: Colors.blue,
-        scaffoldBackgroundColor: Colors.white,
+        scaffoldBackgroundColor: const Color(0xFFF4F6FA),
       ),
       home: const TodoPage(),
     );
@@ -41,6 +41,7 @@ class _TodoPageState extends State<TodoPage> {
     'tarea3',
   ];
 
+  // Agregar una tarea
   void _addTask() {
     final task = _controller.text.trim();
 
@@ -52,6 +53,7 @@ class _TodoPageState extends State<TodoPage> {
     });
   }
 
+  // Editar una tarea
   void _editTask(int index) {
     final editController = TextEditingController(
       text: _tasks[index],
@@ -83,6 +85,9 @@ class _TodoPageState extends State<TodoPage> {
                 _saveEdit(index, editController.text);
                 Navigator.pop(context);
               },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF80A9F5),
+              ),
               child: const Text('Guardar'),
             ),
           ],
@@ -91,6 +96,7 @@ class _TodoPageState extends State<TodoPage> {
     ).then((_) => editController.dispose());
   }
 
+  // Guardar cambios
   void _saveEdit(int index, String value) {
     final task = value.trim();
 
@@ -101,6 +107,7 @@ class _TodoPageState extends State<TodoPage> {
     });
   }
 
+  // Eliminar una tarea
   void _deleteTask(int index) {
     setState(() {
       _tasks.removeAt(index);
@@ -114,6 +121,39 @@ class _TodoPageState extends State<TodoPage> {
     );
   }
 
+  // Confirmar eliminación
+  Future<bool> _confirmDelete() async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: const Text('Eliminar tarea'),
+              content: const Text(
+                '¿Deseas eliminar esta tarea?',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(context, false);
+                  },
+                  child: const Text('Cancelar'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context, true);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                  ),
+                  child: const Text('Eliminar'),
+                ),
+              ],
+            );
+          },
+        ) ??
+        false;
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -123,17 +163,20 @@ class _TodoPageState extends State<TodoPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFFF4F6FA),
       body: SafeArea(
         child: Center(
           child: Container(
-            width: 360,
+            width: 335,
             margin: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               color: Colors.white,
-              border: Border.all(color: Colors.grey.shade300),
+              border: Border.all(
+                color: const Color(0xFFD9DEE7),
+              ),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withAlpha(35),
+                  color: Colors.black.withAlpha(20),
                   blurRadius: 5,
                   offset: const Offset(0, 2),
                 ),
@@ -141,9 +184,13 @@ class _TodoPageState extends State<TodoPage> {
             ),
             child: Column(
               children: [
+
+                // ENCABEZADO
                 Container(
                   width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: 18),
+                  padding: const EdgeInsets.symmetric(
+                    vertical: 14,
+                  ),
                   decoration: BoxDecoration(
                     color: Colors.white,
                     boxShadow: [
@@ -159,12 +206,13 @@ class _TodoPageState extends State<TodoPage> {
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 20,
-                      color: Colors.black54,
+                      color: Color(0xFF666666),
                       fontWeight: FontWeight.w500,
                     ),
                   ),
                 ),
 
+                // CAMPO PARA AGREGAR TAREAS
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 14,
@@ -178,6 +226,10 @@ class _TodoPageState extends State<TodoPage> {
                           onSubmitted: (_) => _addTask(),
                           decoration: const InputDecoration(
                             hintText: 'Ingresa una tarea...',
+                            hintStyle: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 14,
+                            ),
                             border: InputBorder.none,
                             isDense: true,
                           ),
@@ -191,7 +243,8 @@ class _TodoPageState extends State<TodoPage> {
                           onPressed: _addTask,
                           style: ElevatedButton.styleFrom(
                             padding: EdgeInsets.zero,
-                            backgroundColor: Colors.blue.shade300,
+                            backgroundColor: const Color(0xFF80A9F5),
+                            elevation: 2,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(5),
                             ),
@@ -207,42 +260,60 @@ class _TodoPageState extends State<TodoPage> {
                   ),
                 ),
 
-                Divider(height: 1, color: Colors.grey.shade300),
+                Divider(
+                  height: 1,
+                  color: Colors.grey.shade300,
+                ),
 
+                // LISTA DE TAREAS
                 Expanded(
                   child: _tasks.isEmpty
                       ? const Center(
                           child: Text(
                             'No hay tareas pendientes',
-                            style: TextStyle(color: Colors.grey),
+                            style: TextStyle(
+                              color: Colors.grey,
+                              fontSize: 14,
+                            ),
                           ),
                         )
                       : ListView.builder(
+                          padding: EdgeInsets.zero,
                           itemCount: _tasks.length,
                           itemBuilder: (context, index) {
                             return Dismissible(
                               key: ValueKey(
                                 '${_tasks[index]}_$index',
                               ),
+
                               direction: DismissDirection.horizontal,
+
+                              // DESLIZAR A LA DERECHA: EDITAR
                               background: Container(
-                                color: Colors.blue.shade400,
+                                color: const Color(0xFF80A9F5),
                                 alignment: Alignment.centerLeft,
-                                padding: const EdgeInsets.only(left: 20),
+                                padding: const EdgeInsets.only(
+                                  left: 20,
+                                ),
                                 child: const Icon(
                                   Icons.edit,
                                   color: Colors.white,
                                 ),
                               ),
+
+                              // DESLIZAR A LA IZQUIERDA: ELIMINAR
                               secondaryBackground: Container(
                                 color: Colors.red,
                                 alignment: Alignment.centerRight,
-                                padding: const EdgeInsets.only(right: 20),
+                                padding: const EdgeInsets.only(
+                                  right: 20,
+                                ),
                                 child: const Icon(
                                   Icons.delete,
                                   color: Colors.white,
                                 ),
                               ),
+
                               confirmDismiss: (direction) async {
                                 if (direction ==
                                     DismissDirection.startToEnd) {
@@ -250,46 +321,13 @@ class _TodoPageState extends State<TodoPage> {
                                   return false;
                                 }
 
-                                return await showDialog<bool>(
-                                      context: context,
-                                      builder: (context) {
-                                        return AlertDialog(
-                                          title: const Text(
-                                            'Eliminar tarea',
-                                          ),
-                                          content: const Text(
-                                            '¿Deseas eliminar esta tarea?',
-                                          ),
-                                          actions: [
-                                            TextButton(
-                                              onPressed: () =>
-                                                  Navigator.pop(
-                                                context,
-                                                false,
-                                              ),
-                                              child: const Text('Cancelar'),
-                                            ),
-                                            ElevatedButton(
-                                              onPressed: () =>
-                                                  Navigator.pop(
-                                                context,
-                                                true,
-                                              ),
-                                              style:
-                                                  ElevatedButton.styleFrom(
-                                                backgroundColor: Colors.red,
-                                              ),
-                                              child: const Text('Eliminar'),
-                                            ),
-                                          ],
-                                        );
-                                      },
-                                    ) ??
-                                    false;
+                                return await _confirmDelete();
                               },
+
                               onDismissed: (_) {
                                 _deleteTask(index);
                               },
+
                               child: Container(
                                 height: 43,
                                 padding: const EdgeInsets.symmetric(
